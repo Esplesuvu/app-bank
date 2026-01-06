@@ -2,7 +2,7 @@
 
 Application Spring Boot pour gérer des clients et comptes bancaires avec une base H2 en mémoire.
 
-> **Statut actuel :** le backend est fonctionnel et sécurisé (JWT) avec données d'exemple, tandis que le front Angular, le tableau de bord et le chatbot RAG/Telegram restent à implémenter.
+> **Statut actuel :** backend fonctionnel et sécurisé (JWT) avec données d'exemple **et** client Angular prêt (login, dashboard, clients, comptes, chatbot). Le seul blocage restant est l'accès Maven Central (HTTP 403) dans cet environnement, qui empêche l'exécution des builds/tests.
 
 ## Démarrage rapide
 
@@ -14,6 +14,18 @@ Une fois l'application démarrée :
 - API REST disponible sous `/api`
 - Documentation Swagger UI : `http://localhost:8080/swagger-ui.html`
 - Console H2 : `http://localhost:8080/h2-console`
+
+## Frontend Angular
+
+Un client Angular minimal est fourni dans le dossier `frontend` pour consommer l'API sécurisée (JWT) et afficher le tableau de bord, les clients, les comptes et le chatbot.
+
+```bash
+cd frontend
+npm install
+npm run start
+```
+
+Le serveur de dev tourne sur http://localhost:4200. Authentifiez-vous avec l'admin seedé (`admin` / `admin123` par défaut) puis naviguez entre Dashboard, Clients, Comptes et Chatbot. Si l'API tourne sur une autre URL, modifiez `frontend/src/environments/environment.ts`.
 
 ### Authentification JWT
 
@@ -79,18 +91,15 @@ Les messages d'erreur sont retournés au format [RFC 7807](https://datatracker.i
 
 ## État d'avancement
 
-Le backend est opérationnel (API REST sécurisée par JWT pour clients, comptes, opérations, profil utilisateur et changement de mot de passe). Restent à réaliser selon le plan initial :
-
-- Le client Angular (UI + authentification côté front)
-- Le tableau de bord côté UI (ChartJS/ng-chart) : l'API d'agrégation est prête via `/api/dashboard/summary`, il reste à l'afficher dans le client Angular
-- L'intégration du chatbot RAG/Telegram
+- Backend : API REST sécurisée par JWT (clients, comptes courants/épargne, opérations, dashboard, profil utilisateur, changement de mot de passe) avec données d'exemple et traçabilité.
+- Chatbot : endpoint REST RAG simplifié + webhook Telegram optionnel configurables via propriétés.
+- Frontend : client Angular 17 prêt avec login, dashboard (agrégats), gestion clients/comptes/opérations et chatbot.
 
 ### Prochaines étapes proposées
 
-- Implémenter le front-end Angular : authentification JWT, pages clients/comptes/opérations, et navigation protégée.
-- Ajouter le tableau de bord ChartJS (statistiques clients, soldes, répartition des opérations...).
-- Intégrer le chatbot RAG/Telegram (service RAG + bot Telegram) et connecter le bot au backend pour la consultation des comptes/opérations.
-- Ajouter des tests automatisés (unitaires et d'intégration) une fois le problème d'accès Maven Central résolu.
+- **Débloquer le build Maven** : configurer le proxy/miroir ou utiliser un cache Maven local (voir section « Problème de build Maven (403) » et `docs/BUILD_FAQ.md`).
+- Lancer les builds/tests une fois la connectivité Maven rétablie (`mvn -DskipTests package`, `npm run test`, etc.).
+- Durcir la sécurité et la config prod (base de données persistante, secrets externes, TLS, CI/CD).
 
 ## Chatbot RAG + Telegram
 

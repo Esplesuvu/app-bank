@@ -168,6 +168,30 @@ public class BankServiceImpl implements BankService {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public DashboardStatsDTO getDashboardStats() {
+        long customerCount = customerRepository.count();
+        long totalAccounts = bankAccountRepository.count();
+        long totalCurrentAccounts = bankAccountRepository.countCurrentAccounts();
+        long totalSavingAccounts = bankAccountRepository.countSavingAccounts();
+        double totalBalance = bankAccountRepository.sumBalances();
+        long totalOperations = accountOperationRepository.count();
+        double totalDebits = accountOperationRepository.sumByType(OperationType.DEBIT);
+        double totalCredits = accountOperationRepository.sumByType(OperationType.CREDIT);
+
+        return DashboardStatsDTO.builder()
+                .totalCustomers(customerCount)
+                .totalAccounts(totalAccounts)
+                .totalCurrentAccounts(totalCurrentAccounts)
+                .totalSavingAccounts(totalSavingAccounts)
+                .totalBalance(totalBalance)
+                .totalOperations(totalOperations)
+                .totalDebits(totalDebits)
+                .totalCredits(totalCredits)
+                .build();
+    }
+
     private CustomerDTO mapCustomerToDTO(Customer customer) {
         CustomerDTO dto = new CustomerDTO();
         dto.setId(customer.getId());

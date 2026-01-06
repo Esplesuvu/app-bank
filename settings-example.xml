@@ -1,0 +1,77 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <!-- Exemple à copier dans ~/.m2/settings.xml pour contourner les erreurs 403 (proxy/miroir). -->
+  <servers>
+    <!-- Définir ici d'éventuels identifiants pour un miroir privé ou un cache Nexus/Artifactory. -->
+    <!--
+    <server>
+      <id>corp-mirror</id>
+      <username>${env.MAVEN_MIRROR_USER}</username>
+      <password>${env.MAVEN_MIRROR_PASSWORD}</password>
+    </server>
+    -->
+  </servers>
+
+  <proxies>
+    <!-- Activer ce bloc si vous passez par un proxy HTTP(S). -->
+    <!--
+    <proxy>
+      <id>corp-proxy</id>
+      <active>true</active>
+      <protocol>https</protocol>
+      <host>${env.HTTPS_PROXY_HOST}</host>
+      <port>${env.HTTPS_PROXY_PORT}</port>
+      <username>${env.HTTPS_PROXY_USER}</username>
+      <password>${env.HTTPS_PROXY_PASSWORD}</password>
+      <nonProxyHosts>localhost|127.0.0.1</nonProxyHosts>
+    </proxy>
+    -->
+  </proxies>
+
+  <mirrors>
+    <!-- Pointez vers un miroir accessible si Maven Central est bloqué. -->
+    <!--
+    <mirror>
+      <id>corp-mirror</id>
+      <mirrorOf>central</mirrorOf>
+      <url>https://votre-miroir-maven-exemple</url>
+    </mirror>
+    -->
+  </mirrors>
+
+  <profiles>
+    <profile>
+      <id>use-corp-mirror</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <name>Maven Central</name>
+          <url>https://repo.maven.apache.org/maven2</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <name>Maven Central</name>
+          <url>https://repo.maven.apache.org/maven2</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+</settings>

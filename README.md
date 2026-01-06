@@ -2,6 +2,8 @@
 
 Application Spring Boot pour gérer des clients et comptes bancaires avec une base H2 en mémoire.
 
+> **Statut actuel :** le backend est fonctionnel et sécurisé (JWT) avec données d'exemple, tandis que le front Angular, le tableau de bord et le chatbot RAG/Telegram restent à implémenter.
+
 ## Démarrage rapide
 
 ```bash
@@ -59,6 +61,12 @@ curl -X POST http://localhost:8080/api/accounts/{accountId}/debit \
   -d '{"amount":250,"description":"Retrait"}'
 ```
 
+Synthèse pour le tableau de bord (totaux clients/comptes/ops, soldes, débits/crédits) :
+
+```bash
+curl -H 'Authorization: Bearer <JETON>' http://localhost:8080/api/dashboard/summary
+```
+
 Les messages d'erreur sont retournés au format [RFC 7807](https://datatracker.ietf.org/doc/html/rfc7807) avec un HTTP status explicite (404 si ressource absente, 400 pour une requête invalide).
 
 ## Principales fonctionnalités
@@ -74,16 +82,40 @@ Les messages d'erreur sont retournés au format [RFC 7807](https://datatracker.i
 Le backend est opérationnel (API REST sécurisée par JWT pour clients, comptes, opérations, profil utilisateur et changement de mot de passe). Restent à réaliser selon le plan initial :
 
 - Le client Angular (UI + authentification côté front)
-- La partie dashboard (ChartJS/ng-chart) pour les métriques
+- Le tableau de bord côté UI (ChartJS/ng-chart) : l'API d'agrégation est prête via `/api/dashboard/summary`, il reste à l'afficher dans le client Angular
 - L'intégration du chatbot RAG/Telegram
 
+### Prochaines étapes proposées
+
+- Implémenter le front-end Angular : authentification JWT, pages clients/comptes/opérations, et navigation protégée.
+- Ajouter le tableau de bord ChartJS (statistiques clients, soldes, répartition des opérations...).
+- Intégrer le chatbot RAG/Telegram (service RAG + bot Telegram) et connecter le bot au backend pour la consultation des comptes/opérations.
+- Ajouter des tests automatisés (unitaires et d'intégration) une fois le problème d'accès Maven Central résolu.
+
+## Chatbot RAG + Telegram
+
+Un chatbot léger est exposé via l'API pour répondre aux questions courantes sur l'application à partir d'une base de connaissances intégrée.
+
+- **Endpoint REST** : `POST /api/chatbot/query`
+
+```bash
+curl -X POST http://localhost:8080/api/chatbot/query \
+  -H 'Content-Type: application/json' \
+  -d '{"question":"Comment créer un compte courant ?"}'
+```
+
+La réponse inclut un résumé et les sources utilisées.
+
+- **Telegram (optionnel)** : activez le bot en définissant les propriétés `chatbot.telegram-enabled=true` et `chatbot.telegram-bot-token=<votre_token>`, puis déclarez le webhook `https://<host>/api/chatbot/telegram/webhook` via l'API Telegram. Le détail des étapes est disponible dans [docs/CHATBOT.md](docs/CHATBOT.md).
+
 ## Problème de build Maven (403)
+
+👉 Besoin d'un pas-à-pas détaillé ? Consultez [docs/BUILD_FAQ.md](docs/BUILD_FAQ.md) et utilisez le script `./scripts/apply-settings-example.sh` pour copier le modèle `settings.xml` dans `~/.m2` avant de le personnaliser.
 
 L'environnement actuel bloque l'accès à Maven Central (réponse HTTP 403) et empêche l'exécution de `mvn package`. Pour construire l'application :
 
 1. S'assurer que la machine dispose d'un accès HTTPS sortant vers Maven Central (https://repo.maven.apache.org/maven2) ou un miroir d'entreprise.
-   - Un dépôt de secours `https://repo.spring.io/release` est déjà ajouté dans le `pom.xml`. Si le proxy/filtrage bloque aussi ce dépôt, autorisez-le ou remplacez-le par un miroir accessible.
-2. Si un proxy est requis, le déclarer dans `~/.m2/settings.xml` :
+2. Si un proxy est requis, le déclarer dans `~/.m2/settings.xml` (un exemple prêt à l'emploi est fourni dans `settings-example.xml`) :
 
 ```xml
 <settings>
@@ -96,7 +128,15 @@ L'environnement actuel bloque l'accès à Maven Central (réponse HTTP 403) et e
       <port>3128</port>
     </proxy>
   </proxies>
+  <mirrors>
+    <mirror>
+      <id>corp-mirror</id>
+      <mirrorOf>central</mirrorOf>
+      <url>https://votre-miroir-maven-exemple</url>
+    </mirror>
+  </mirrors>
 </settings>
 ```
 
-3. Relancer `mvn -DskipTests package` (ou `mvn spring-boot:run`) une fois la connectivité rétablie.
+3. Copiez/ajustez `settings-example.xml` vers `~/.m2/settings.xml`, puis relancez `mvn -s ~/.m2/settings.xml -DskipTests package` (ou `mvn spring-boot:run`) une fois la connectivité rétablie.
+   - Astuce : si vous disposez déjà d'un `.m2/repository` pré-rempli (cache CI/CD ou machine connectée), vous pouvez le copier sur le poste de build, puis exécuter `mvn -o -DskipTests package` pour travailler hors ligne.

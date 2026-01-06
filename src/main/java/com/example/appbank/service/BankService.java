@@ -30,4 +30,6 @@ public interface BankService {
     void transfer(String sourceAccountId, String destinationAccountId, double amount, String performedBy);
 
     List<AccountOperationDTO> accountHistory(String accountId);
+
+    DashboardStatsDTO getDashboardStats();
 }
